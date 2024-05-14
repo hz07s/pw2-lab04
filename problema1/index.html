@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listado de Regiones</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+li {
+  padding: 5px 0;
+  border-bottom: 1px solid #ccc;
+  flex-basis: calc(50% - 10px); /* Distribuye los elementos en dos columnas */
+}
+
+li:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 600px) {
+  li {
+    flex-basis: 100%; /* En pantallas pequeñas, muestra los elementos en una sola columna */
+  }
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Listado de Regiones</h1>
+    <ul id="regiones-lista"></ul>
+  </div>
+  <script>
+    // Función para realizar la solicitud fetch
+    function cargarDatos() {
+        fetch('../data.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Hubo un error al cargar los datos.');
+                }
+                return response.json();
+            })
+            .then(data => listarRegiones(data))
+            .catch(error => console.error(error));
+    }
+
+    // Función para listar las regiones
+    function listarRegiones(datos) {
+        var regionesLista = document.getElementById('regiones-lista');
+        datos.forEach(function(item) {
+            var li = document.createElement('li');
+            li.textContent = item.region;
+            regionesLista.appendChild(li);
+        });
+    }
+
+    // Llamar a la función para cargar los datos cuando se cargue la página
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarDatos();
+    });
+  </script>
+</body>
+</html>
