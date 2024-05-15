@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top 10 Regiones por Confirmados</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Top 10 Regiones por Confirmados</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Región</th>
+          <th>Confirmados</th>
+        </tr>
+      </thead>
+      <tbody id="top-regiones"></tbody>
+    </table>
+  </div>
+  <script>
+    // Función para realizar la solicitud fetch
+    function cargarDatos() {
+        fetch('../data.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Hubo un error al cargar los datos.');
+                }
+                return response.json();
+            })
+            .then(data => encontrarTopRegiones(data))
+            .catch(error => console.error(error));
+    }
+
+    // Función para encontrar las 10 regiones con mayor número total de confirmados
+    function encontrarTopRegiones(datos) {
+        // Calcular la suma total de confirmados para cada región
+        var regionesTotales = [];
+        datos.forEach(function(item) {
+            var totalConfirmados = calcularTotalConfirmados(item.confirmed);
+            regionesTotales.push({region: item.region, total: totalConfirmados});
+        });
+
+        // Ordenar las regiones en orden descendente según la suma total de confirmados
+        regionesTotales.sort((a, b) => b.total - a.total);
+
+        // Mostrar las 10 regiones con mayor número total de confirmados
+        var topRegiones = regionesTotales.slice(0, 10);
+        var topRegionesLista = document.getElementById('top-regiones');
+        topRegiones.forEach(function(item) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = `<td>${item.region}</td><td>${item.total}</td>`;
+            topRegionesLista.appendChild(tr);
+        });
+    }
+
+    // Función para calcular el número total de confirmados por región
+    function calcularTotalConfirmados(confirmados) {
+        var total = 0;
+        confirmados.forEach(function(dia) {
+            total += parseInt(dia.value);
+        });
+        return total;
+    }
+
+    // Llamar a la función para cargar los datos cuando se cargue la página
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarDatos();
+    });
+  </script>
+</body>
+</html>
