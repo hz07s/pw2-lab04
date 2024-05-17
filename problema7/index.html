@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gráfico Comparativo de Confirmados por Región</title>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+}
+
+#chart_div {
+  margin-top: 20px;
+}
+</style>
+<script>
+  google.charts.load('current', {'packages':['corechart', 'controls']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+    fetch('../data.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Hubo un error al cargar los datos.');
+        }
+        return response.json();
+      })
+      .then(data => {
+        var regionSelect = document.getElementById('region-select');
+        var regions = data.map(region => region.region);
+        regions.forEach(region => {
+          var option = document.createElement('option');
+          option.value = region;
+          option.textContent = region;
+          regionSelect.appendChild(option);
+        });
+
+        function updateChart() {
+          var selectedRegions = Array.from(regionSelect.selectedOptions).map(option => option.value);
+          var filteredData = data.filter(region => selectedRegions.includes(region.region));
+
+          var chartData = new google.visualization.DataTable();
+          chartData.addColumn('string', 'Fecha');
+
+          filteredData.forEach(region => {
+            chartData.addColumn('number', region.region);
+          });
+
+          var dates = [];
+          filteredData[0].confirmed.forEach(item => {
+            dates.push(item.date);
+          });
+          chartData.addRows(dates.length);
+
+          filteredData.forEach((region, index) => {
+            chartData.setColumnLabel(index + 1, region.region);
+            region.confirmed.forEach((item, i) => {
+              chartData.setValue(i, index + 1, parseInt(item.value));
+            });
+          });
+
+          var options = {
+            title: 'Gráfico Comparativo de Confirmados por Región',
+            curveType: 'function',
+            legend: { position: 'bottom' }
+          };
+
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+          chart.draw(chartData, options);
+        }
+
+        regionSelect.addEventListener('change', updateChart);
+
+        updateChart();
+      })
+      .catch(error => console.error(error));
+  }
+</script>
+</head>
+<body>
+  <div class="container">
+    <h1>Gráfico Comparativo de Confirmados por Región</h1>
+    <label for="region-select">Selecciona las regiones a comparar:</label>
+    <select id="region-select" multiple>
+    </select>
+    <div id="chart_div" style="width: 100%; height: 400px;"></div>
+  </div>
+</body>
+</html>
